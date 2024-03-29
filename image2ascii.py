@@ -74,7 +74,7 @@ def display_luminance_preview(luminance_values: list[int], dimensions: tuple[int
     plt.show()
 
 
-def save_svg_ascii_grid_from_luminance(luminance_data: list[int], dimensions: tuple[int, int], filename: str) -> str:
+def save_svg_ascii_grid_from_luminance(luminance_data: list[int], dimensions: tuple[int, int], filename: str, bottom_text: list[str] = None, left_justified=True) -> str:
     """
     Save an SVG file with a grid of the letter "g" based on the dimensions of the provided image. Returns the saved filename.
     """
@@ -99,28 +99,18 @@ def save_svg_ascii_grid_from_luminance(luminance_data: list[int], dimensions: tu
             index = y * width + x
             density_str_index = int(luminance_data[index] / 255 * (len(density_str) - 1) + 0.5)
             density_str_index = len(density_str) - density_str_index - 1
-            # Special character placement for signature text
-            bottom_text = [
-                # "Audrey Hepburn by Yousuf Karsh, 1956",
-                # "Grayson Pike, 2024"
-                # "Audrey Hepburn",
-                # "Yousuf Karsh, 1956",
-                # "Grayson Pike, 2024"
-                "Jasper Johns",
-                "Yousuf Karsh, 1990",
-                "Grayson Pike, 2024"
-            ]
-            # LEFT JUSTIFIED
-            bottom_text_index = (y - height) + len(bottom_text)
-            if bottom_text_index >= 0 and x < len(bottom_text[bottom_text_index]):
-                character = bottom_text[bottom_text_index][x]
-            # RIGHT JUSTIFIED
-            # bottom_text_index = (y - height) + len(bottom_text)
-            # if bottom_text_index >= 0 and x >= width - len(bottom_text[bottom_text_index]):
-            #     character = bottom_text[bottom_text_index][x - (width - len(bottom_text[bottom_text_index]))]
-            # Normal density character selection
-            else:
-                character = density_str[density_str_index]
+            character = density_str[density_str_index]
+            # If bottom text is provided, we may overwrite the normal character selection with the text character
+            if bottom_text and left_justified:
+                # Left justified bottom text
+                bottom_text_index = (y - height) + len(bottom_text)
+                if bottom_text_index >= 0 and x < len(bottom_text[bottom_text_index]):
+                    character = bottom_text[bottom_text_index][x]
+            elif bottom_text and not left_justified:
+                # Right justified bottom text
+                bottom_text_index = (y - height) + len(bottom_text)
+                if bottom_text_index >= 0 and x >= width - len(bottom_text[bottom_text_index]):
+                    character = bottom_text[bottom_text_index][x - (width - len(bottom_text[bottom_text_index]))]
             text = dwg.text(
                 character,
                 insert=(x_pos, y_pos),
@@ -147,14 +137,24 @@ def main():
         enhancer = ImageEnhance.Contrast(image)
         enhanced_image = enhancer.enhance(1.5)
         contrasted_images.append(enhanced_image)
+    # Convert images to RGB pixel data lists [[R, G, B, R, G, B, ...]..]
     rgb_data = [get_pixel_data(image) for image in contrasted_images]
+    # Convert RBG data lists to Luminance data lists [[L, L, ...]..]
     luminance_data = [rgb_to_luminance(rgb) for rgb in rgb_data]
-    # display_luminance_preview(luminance_data[1], resized_images[1].size)
+    # Uncomment this to see a preview window with the luminance values plotted to gray squares
+    # display_luminance_preview(luminance_data[0], resized_images[0].size)
+    # Save luminance lists to ASCII SVGs
     for i in range(len(luminance_data)):
+        bottom_text = [
+            "Artwork Title",
+            "Grayson Pike, 2024"
+        ]
         filename = save_svg_ascii_grid_from_luminance(
             luminance_data[i],
             contrasted_images[i].size,
-            filenames[i].split(".")[0]  # Remove file extension
+            filenames[i].split(".")[0],  # Remove file extension
+            bottom_text,
+            left_justified=True
         )
         print(f"Saved file: {filename}")
 
