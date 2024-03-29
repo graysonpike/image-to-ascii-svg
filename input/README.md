@@ -1,0 +1,1 @@
+Input .png and .jpg files go here.

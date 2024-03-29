@@ -1,0 +1,1 @@
+After running `image2ascii.py`, SVG outputs will be saved here.
