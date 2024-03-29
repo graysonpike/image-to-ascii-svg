@@ -8,7 +8,7 @@ or a series of characters that appear decreasingly brighter.
 The density string included in the project is: `"Ñ@#W$9876543210?!abc;:+=-,.   "` which is a lightly modified version
 of CodingTrain's density string.
 
-![](examples/yousuf_karsh_audrey_hepburn.png)
+![](examples/yousuf_karsh_jawaharlal_nehru.png)
 
 ## Run it yourself
 
